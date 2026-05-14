@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Simulasi CAT Ujian Dinas Tingkat I - BKN</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:wght@400;600&display=swap');
+
+  :root {
+    --biru-tua: #003580;
+    --biru: #0052a5;
+    --biru-muda: #1976d2;
+    --biru-light: #e3f0ff;
+    --emas: #f0a500;
+    --emas-muda: #fff3cd;
+    --merah: #c62828;
+    --hijau: #2e7d32;
+    --hijau-muda: #e8f5e9;
+    --abu: #f4f6f9;
+    --border: #d0dce8;
+    --teks: #1a2a3a;
+    --teks-abu: #5a6a7a;
+    --putih: #ffffff;
+    --shadow: 0 2px 8px rgba(0,53,128,0.10);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background: #e8eef6;
+    color: var(--teks);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, var(--biru-tua) 0%, var(--biru) 60%, var(--biru-muda) 100%);
+    color: white;
+    padding: 0;
+    box-shadow: 0 3px 12px rgba(0,53,128,0.3);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+  }
+  .header-logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-icon {
+    width: 48px; height: 48px;
+    background: white;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .header-title h1 {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+  }
+  .header-title p {
+    font-size: 12px;
+    opacity: 0.85;
+  }
+  .timer-block {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 10px;
+    padding: 8px 18px;
+  }
+  .timer-icon { font-size: 22px; }
+  .timer-label { font-size: 11px; opacity: 0.85; }
+  .timer-value {
+    font-family: 'Source Serif 4', serif;
+    font-size: 28px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: #ffe082;
+  }
+  .timer-value.urgent { color: #ff5252; animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+  .header-info {
+    display: flex;
+    gap: 24px;
+    padding: 8px 24px;
+    font-size: 12px;
+    opacity: 0.9;
+  }
+  .header-info span { display: flex; align-items: center; gap: 4px; }
+
+  /* LAYOUT */
+  .main-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 0;
+    min-height: calc(100vh - 100px);
+  }
+
+  /* SOAL AREA */
+  .soal-area {
+    padding: 20px 24px;
+  }
+
+  .soal-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+
+  .soal-header {
+    background: linear-gradient(90deg, var(--biru-tua), var(--biru));
+    color: white;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .soal-nomor {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+  .soal-kelompok {
+    font-size: 11px;
+    background: rgba(255,255,255,0.2);
+    padding: 3px 10px;
+    border-radius: 20px;
+  }
+
+  .soal-body {
+    padding: 22px 24px;
+  }
+  .soal-teks {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--teks);
+    margin-bottom: 22px;
+    font-weight: 500;
+  }
+
+  .opsi-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .opsi-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 16px;
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: #fafcff;
+  }
+  .opsi-item:hover {
+    border-color: var(--biru-muda);
+    background: var(--biru-light);
+  }
+  .opsi-item.selected {
+    border-color: var(--biru);
+    background: var(--biru-light);
+  }
+  .opsi-item.correct {
+    border-color: var(--hijau);
+    background: var(--hijau-muda);
+  }
+  .opsi-item.wrong {
+    border-color: var(--merah);
+    background: #ffebee;
+  }
+  .opsi-huruf {
+    min-width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--biru);
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .opsi-item.selected .opsi-huruf {
+    background: var(--biru);
+    border-color: var(--biru);
+    color: white;
+  }
+  .opsi-item.correct .opsi-huruf {
+    background: var(--hijau);
+    border-color: var(--hijau);
+    color: white;
+  }
+  .opsi-item.wrong .opsi-huruf {
+    background: var(--merah);
+    border-color: var(--merah);
+    color: white;
+  }
+  .opsi-teks {
+    font-size: 14px;
+    line-height: 1.5;
+    padding-top: 4px;
+  }
+
+  .soal-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--abu);
+  }
+  .btn {
+    padding: 9px 22px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-prev {
+    background: white;
+    border: 2px solid var(--biru);
+    color: var(--biru);
+  }
+  .btn-prev:hover { background: var(--biru-light); }
+  .btn-next {
+    background: var(--biru);
+    color: white;
+  }
+  .btn-next:hover { background: var(--biru-tua); }
+  .btn-ragu {
+    background: var(--emas-muda);
+    border: 2px solid var(--emas);
+    color: #7a5500;
+    font-size: 13px;
+    padding: 8px 14px;
+  }
+  .btn-ragu.active { background: var(--emas); color: white; }
+  .btn-finish {
+    background: var(--merah);
+    color: white;
+    padding: 10px 24px;
+    font-size: 15px;
+  }
+  .btn-finish:hover { background: #b71c1c; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* SIDEBAR */
+  .sidebar {
+    background: white;
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 100px;
+    height: calc(100vh - 100px);
+    overflow-y: auto;
+  }
+
+  .sidebar-section {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--biru-tua);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 10px;
+  }
+
+  /* Legenda */
+  .legenda {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+    font-size: 11px;
+  }
+  .leg-item {
+    display: flex; align-items: center; gap: 5px;
+  }
+  .leg-dot {
+    width: 14px; height: 14px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .dot-dijawab { background: var(--biru); }
+  .dot-belum { background: white; border: 1.5px solid var(--border); }
+  .dot-ragu { background: var(--emas); }
+  .dot-aktif { background: var(--biru-muda); border: 2px solid var(--biru-tua); }
+
+  /* Navigasi nomor */
+  .nomor-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+    padding: 14px 16px;
+  }
+  .nomor-btn {
+    aspect-ratio: 1;
+    border-radius: 5px;
+    border: 1.5px solid var(--border);
+    background: white;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--teks-abu);
+  }
+  .nomor-btn:hover { border-color: var(--biru-muda); color: var(--biru); }
+  .nomor-btn.aktif { background: var(--biru-muda); color: white; border-color: var(--biru-tua); }
+  .nomor-btn.dijawab { background: var(--biru); color: white; border-color: var(--biru); }
+  .nomor-btn.ragu { background: var(--emas); color: white; border-color: var(--emas); }
+
+  /* Statistik */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .stat-item {
+    background: var(--abu);
+    border-radius: 7px;
+    padding: 8px 10px;
+    text-align: center;
+  }
+  .stat-angka { font-size: 22px; font-weight: 700; }
+  .stat-label { font-size: 10px; color: var(--teks-abu); margin-top: 2px; }
+  .stat-item.stat-dijawab .stat-angka { color: var(--biru); }
+  .stat-item.stat-belum .stat-angka { color: var(--merah); }
+  .stat-item.stat-ragu .stat-angka { color: var(--emas); }
+  .stat-item.stat-total .stat-angka { color: var(--teks); }
+
+  .finish-area {
+    padding: 14px 16px;
+    margin-top: auto;
+  }
+  .btn-finish-full {
+    width: 100%;
+    justify-content: center;
+    padding: 12px;
+    font-size: 15px;
+    border-radius: 8px;
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: white;
+    border-radius: 14px;
+    width: 480px;
+    max-width: 95vw;
+    box-shadow: 0 10px 40px rgba(0,53,128,0.25);
+    overflow: hidden;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from{transform:translateY(30px);opacity:0} to{transform:translateY(0);opacity:1} }
+  .modal-header {
+    background: linear-gradient(135deg, var(--biru-tua), var(--biru));
+    color: white;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .modal-header-icon { font-size: 26px; }
+  .modal-header h2 { font-size: 17px; }
+  .modal-body { padding: 22px 24px; }
+  .modal-stat-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 18px;
+  }
+  .modal-stat {
+    text-align: center;
+    background: var(--abu);
+    border-radius: 8px;
+    padding: 12px 8px;
+  }
+  .modal-stat-angka { font-size: 26px; font-weight: 700; }
+  .modal-stat-label { font-size: 11px; color: var(--teks-abu); }
+  .modal-stat.ms-benar .modal-stat-angka { color: var(--hijau); }
+  .modal-stat.ms-salah .modal-stat-angka { color: var(--merah); }
+  .modal-stat.ms-kosong .modal-stat-angka { color: var(--teks-abu); }
+  .modal-skor {
+    text-align: center;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--biru-tua), var(--biru));
+    border-radius: 10px;
+    color: white;
+    margin-bottom: 18px;
+  }
+  .modal-skor-angka { font-size: 48px; font-weight: 700; color: #ffe082; }
+  .modal-skor-label { font-size: 13px; opacity: 0.9; }
+  .modal-ket { font-size: 13px; color: var(--teks-abu); line-height: 1.6; margin-bottom: 18px; }
+  .modal-btn-row { display: flex; gap: 10px; justify-content: flex-end; }
+  .btn-review {
+    background: var(--biru-light);
+    color: var(--biru-tua);
+    border: 2px solid var(--biru);
+    padding: 10px 20px;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-review:hover { background: var(--biru-muda); color: white; }
+
+  /* KONFIRMASI SELESAI */
+  .konfirmasi-modal .modal-header { background: linear-gradient(135deg, #7b1fa2, #ab47bc); }
+  .konfirmasi-body { padding: 22px 24px; font-size: 14px; line-height: 1.7; }
+  .konfirmasi-stats { background: var(--abu); border-radius: 8px; padding: 14px; margin: 14px 0; }
+
+  /* PROGRESS BAR */
+  .progress-wrap { padding: 8px 16px 0; }
+  .progress-bar-bg {
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--biru-muda), var(--biru-tua));
+    border-radius: 3px;
+    transition: width 0.4s;
+  }
+  .progress-label { font-size: 11px; color: var(--teks-abu); text-align: right; margin-top: 4px; margin-bottom: 6px; }
+
+  /* WELCOME SCREEN */
+  .welcome-screen {
+    position: fixed; inset: 0;
+    background: linear-gradient(135deg, var(--biru-tua) 0%, var(--biru) 50%, #1565c0 100%);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 999;
+  }
+  .welcome-card {
+    background: white;
+    border-radius: 16px;
+    width: 500px; max-width: 95vw;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
+    animation: slideUp 0.4s ease;
+  }
+  .welcome-header {
+    background: linear-gradient(135deg, var(--biru-tua), var(--biru));
+    color: white;
+    padding: 24px;
+    text-align: center;
+  }
+  .welcome-header .logo-big { font-size: 48px; margin-bottom: 8px; }
+  .welcome-header h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .welcome-header p { font-size: 13px; opacity: 0.85; }
+  .welcome-body { padding: 24px; }
+  .info-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; }
+  .info-table td { padding: 8px 10px; font-size: 13px; border-bottom: 1px solid var(--border); }
+  .info-table td:first-child { color: var(--teks-abu); width: 45%; }
+  .info-table td:last-child { font-weight: 600; color: var(--biru-tua); }
+  .aturan { background: var(--abu); border-radius: 8px; padding: 14px; margin-bottom: 18px; font-size: 13px; line-height: 1.8; }
+  .aturan ul { padding-left: 18px; }
+  .btn-mulai {
+    width: 100%;
+    background: linear-gradient(90deg, var(--biru-tua), var(--biru-muda));
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .btn-mulai:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 15px rgba(0,53,128,0.3); }
+
+  @media(max-width:768px) {
+    .main-layout { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; border-left: none; border-top: 1px solid var(--border); }
+    .header-info { display: none; }
+    .timer-value { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- WELCOME SCREEN -->
+<div class="welcome-screen" id="welcomeScreen">
+  <div class="welcome-card">
+    <div class="welcome-header">
+      <div class="logo-big">🏛️</div>
+      <h2>SIMULASI CAT UJIAN DINAS</h2>
+      <p>Badan Kepegawaian Negara — Tingkat I</p>
+    </div>
+    <div class="welcome-body">
+      <table class="info-table">
+        <tr><td>Jenis Ujian</td><td>Ujian Dinas Tingkat I</td></tr>
+        <tr><td>Sistem</td><td>Computer Assisted Test (CAT)</td></tr>
+        <tr><td>Jumlah Soal</td><td>100 Soal</td></tr>
+        <tr><td>Waktu</td><td>90 Menit</td></tr>
+        <tr><td>Nilai Patokan</td><td>100 (Bobot per soal = 1)</td></tr>
+        <tr><td>Passing Grade</td><td>70</td></tr>
+      </table>
+      <div class="aturan">
+        <strong>⚠️ Peraturan Ujian:</strong>
+        <ul>
+          <li>Jawab semua soal sebelum waktu habis</li>
+          <li>Setiap jawaban benar bernilai 1 poin</li>
+          <li>Tidak ada pengurangan nilai untuk jawaban salah</li>
+          <li>Gunakan tombol 🚩 untuk menandai soal ragu</li>
+          <li>Klik <strong>Selesai Ujian</strong> setelah semua dijawab</li>
+        </ul>
+      </div>
+      <button class="btn-mulai" onclick="mulaiUjian()">▶ MULAI UJIAN SEKARANG</button>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="header-top">
+    <div class="header-logo">
+      <div class="logo-icon">🏛️</div>
+      <div class="header-title">
+        <h1>BADAN KEPEGAWAIAN NEGARA</h1>
+        <p>Simulasi CAT — Ujian Dinas Tingkat I</p>
+      </div>
+    </div>
+    <div class="timer-block">
+      <div class="timer-icon">⏱</div>
+      <div>
+        <div class="timer-label">SISA WAKTU</div>
+        <div class="timer-value" id="timerDisplay">90:00</div>
+      </div>
+    </div>
+  </div>
+  <div class="header-info">
+    <span>👤 Peserta Ujian</span>
+    <span>📋 Ujian Dinas Tk. I</span>
+    <span>📅 Sesi: 2026</span>
+    <span id="headerProgress">📊 0/100 Terjawab</span>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main-layout">
+  <!-- SOAL -->
+  <div class="soal-area">
+    <div class="soal-card">
+      <div class="soal-header">
+        <div class="soal-nomor" id="soalNomor">Soal 1 dari 100</div>
+        <div class="soal-kelompok" id="soalKelompok">Kelompok A</div>
+      </div>
+      <div class="soal-body">
+        <div class="soal-teks" id="soalTeks"></div>
+        <ul class="opsi-list" id="opsiList"></ul>
+      </div>
+      <div class="soal-nav">
+        <button class="btn btn-prev" id="btnPrev" onclick="prevSoal()">◀ Sebelumnya</button>
+        <button class="btn btn-ragu" id="btnRagu" onclick="toggleRagu()">🚩 Ragu-ragu</button>
+        <button class="btn btn-next" id="btnNext" onclick="nextSoal()">Berikutnya ▶</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <!-- Statistik -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">📊 Statistik</div>
+      <div class="stat-grid">
+        <div class="stat-item stat-dijawab">
+          <div class="stat-angka" id="statDijawab">0</div>
+          <div class="stat-label">Dijawab</div>
+        </div>
+        <div class="stat-item stat-belum">
+          <div class="stat-angka" id="statBelum">100</div>
+          <div class="stat-label">Belum</div>
+        </div>
+        <div class="stat-item stat-ragu">
+          <div class="stat-angka" id="statRagu">0</div>
+          <div class="stat-label">Ragu</div>
+        </div>
+        <div class="stat-item stat-total">
+          <div class="stat-angka">100</div>
+          <div class="stat-label">Total Soal</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Progress -->
+    <div class="sidebar-section">
+      <div class="progress-wrap" style="padding:0">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
+        </div>
+        <div class="progress-label" id="progressLabel">0% selesai</div>
+      </div>
+    </div>
+
+    <!-- Legenda -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Keterangan</div>
+      <div class="legenda">
+        <div class="leg-item"><div class="leg-dot dot-aktif"></div> Soal Aktif</div>
+        <div class="leg-item"><div class="leg-dot dot-dijawab"></div> Dijawab</div>
+        <div class="leg-item"><div class="leg-dot dot-ragu"></div> Ragu-ragu</div>
+        <div class="leg-item"><div class="leg-dot dot-belum"></div> Belum</div>
+      </div>
+    </div>
+
+    <!-- Navigasi Nomor -->
+    <div class="sidebar-section">
+      <div class="sidebar-title">Navigasi Soal</div>
+    </div>
+    <div class="nomor-grid" id="nomorGrid"></div>
+
+    <!-- Tombol Selesai -->
+    <div class="finish-area">
+      <button class="btn btn-finish btn-finish-full" onclick="konfirmasiSelesai()">
+        ✔ SELESAI UJIAN
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL KONFIRMASI SELESAI -->
+<div class="modal-overlay" id="modalKonfirmasi">
+  <div class="modal konfirmasi-modal">
+    <div class="modal-header">
+      <div class="modal-header-icon">⚠️</div>
+      <h2>Konfirmasi Selesai Ujian</h2>
+    </div>
+    <div class="konfirmasi-body">
+      <p>Apakah Anda yakin ingin <strong>mengakhiri ujian</strong>?</p>
+      <div class="konfirmasi-stats" id="konfirmasiStats"></div>
+      <p style="color:var(--merah);font-size:12px;">Setelah selesai, jawaban tidak dapat diubah.</p>
+    </div>
+    <div style="padding:0 24px 20px;display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn btn-prev" onclick="tutupKonfirmasi()">Kembali</button>
+      <button class="btn btn-finish" onclick="selesaiUjian()">Ya, Selesaikan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL HASIL -->
+<div class="modal-overlay" id="modalHasil">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-header-icon">🏆</div>
+      <h2>Hasil Ujian Dinas Tingkat I</h2>
+    </div>
+    <div class="modal-body">
+      <div class="modal-skor">
+        <div style="font-size:13px;opacity:0.9;margin-bottom:4px;">NILAI AKHIR</div>
+        <div class="modal-skor-angka" id="hasilSkor">0</div>
+        <div class="modal-skor-label" id="hasilStatus">—</div>
+      </div>
+      <div class="modal-stat-row">
+        <div class="modal-stat ms-benar">
+          <div class="modal-stat-angka" id="hasilBenar">0</div>
+          <div class="modal-stat-label">✅ Benar</div>
+        </div>
+        <div class="modal-stat ms-salah">
+          <div class="modal-stat-angka" id="hasilSalah">0</div>
+          <div class="modal-stat-label">❌ Salah</div>
+        </div>
+        <div class="modal-stat ms-kosong">
+          <div class="modal-stat-angka" id="hasilKosong">0</div>
+          <div class="modal-stat-label">⬜ Kosong</div>
+        </div>
+      </div>
+      <div class="modal-ket" id="hasilKet"></div>
+      <div class="modal-btn-row">
+        <button class="btn-review" onclick="reviewJawaban()">🔍 Review Jawaban</button>
+        <button class="btn btn-mulai" style="width:auto;padding:10px 20px" onclick="ulangiUjian()">🔄 Ulangi</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== DATA SOAL 100 BUTIR ==========
+const soalData = [
+  // === KELOMPOK A: PANCASILA (1-10) ===
+  {
+    no:1, kelompok:"Kelompok A – Pancasila",
+    soal:"Pancasila sebagai dasar negara Indonesia tercantum dalam...",
+    opsi:["UUD 1945 Pasal 1","Pembukaan UUD 1945 alinea ke-4","Batang Tubuh UUD 1945","Penjelasan UUD 1945"],
+    jawaban:1
+  },
+  {
+    no:2, kelompok:"Kelompok A – Pancasila",
+    soal:"Sila ke-2 Pancasila 'Kemanusiaan yang adil dan beradab' mengandung makna bahwa bangsa Indonesia...",
+    opsi:["Mengakui persamaan derajat, hak, dan kewajiban sesama manusia","Mengutamakan persatuan di atas segalanya","Berketuhanan yang maha esa dalam kehidupan berbangsa","Mengakui kekuasaan negara atas warga"],
+    jawaban:0
+  },
+  {
+    no:3, kelompok:"Kelompok A – Pancasila",
+    soal:"Pancasila sebagai 'pandangan hidup bangsa' artinya Pancasila merupakan...",
+    opsi:["Sumber dari segala sumber hukum","Petunjuk arah kehidupan bermasyarakat, berbangsa, dan bernegara","Dasar penyelenggaraan pemerintahan","Landasan pembentukan peraturan perundang-undangan"],
+    jawaban:1
+  },
+  {
+    no:4, kelompok:"Kelompok A – Pancasila",
+    soal:"Musyawarah untuk mufakat dalam pengambilan keputusan merupakan pengamalan sila ke...",
+    opsi:["Dua","Tiga","Empat","Lima"],
+    jawaban:2
+  },
+  {
+    no:5, kelompok:"Kelompok A – Pancasila",
+    soal:"Rumusan Pancasila yang sah dan otentik adalah yang terdapat dalam...",
+    opsi:["Piagam Jakarta","Pembukaan UUD 1945","Tap MPRS No. XX/1966","BPUPKI sidang pertama"],
+    jawaban:1
+  },
+  {
+    no:6, kelompok:"Kelompok A – Pancasila",
+    soal:"Pancasila sebagai 'ideologi terbuka' mengandung pengertian bahwa nilai-nilai Pancasila...",
+    opsi:["Dapat berubah sesuai kebutuhan zaman","Bersifat universal dan tidak eksklusif","Bersumber dari nilai-nilai yang hidup dalam masyarakat Indonesia dan dapat dikembangkan sesuai perkembangan zaman","Dapat diubah oleh MPR sewaktu-waktu"],
+    jawaban:2
+  },
+  {
+    no:7, kelompok:"Kelompok A – Pancasila",
+    soal:"Nilai instrumental Pancasila adalah...",
+    opsi:["Nilai dasar yang tidak berubah","Nilai yang terkandung dalam sila-sila Pancasila","Penjabaran dari nilai dasar dalam bentuk peraturan perundang-undangan dan kebijakan pemerintah","Nilai yang abstrak dan universal"],
+    jawaban:2
+  },
+  {
+    no:8, kelompok:"Kelompok A – Pancasila",
+    soal:"Sikap yang mencerminkan pengamalan sila 'Persatuan Indonesia' di lingkungan kerja adalah...",
+    opsi:["Mengutamakan kepentingan pribadi","Bekerja sama tanpa memandang suku, agama, dan ras","Hanya berteman dengan sesama suku daerah","Mengabaikan rekan kerja yang berbeda agama"],
+    jawaban:1
+  },
+  {
+    no:9, kelompok:"Kelompok A – Pancasila",
+    soal:"Pancasila sebagai 'sumber dari segala sumber hukum' berarti...",
+    opsi:["Pancasila di atas UUD 1945","Semua peraturan perundang-undangan harus bersumber dan tidak boleh bertentangan dengan Pancasila","Pancasila dapat digunakan langsung sebagai hukum","Pancasila setara dengan undang-undang"],
+    jawaban:1
+  },
+  {
+    no:10, kelompok:"Kelompok A – Pancasila",
+    soal:"Butir-butir pengamalan Pancasila ditetapkan melalui...",
+    opsi:["Keppres No. 24 Tahun 1999","Tap MPR No. I/MPR/2003","Keppres No. 18 Tahun 2017","UU No. 5 Tahun 2014"],
+    jawaban:0
+  },
+  // === KELOMPOK A: UUD 1945 (11-20) ===
+  {
+    no:11, kelompok:"Kelompok A – UUD 1945",
+    soal:"Amandemen UUD 1945 dilakukan sebanyak...",
+    opsi:["2 kali","3 kali","4 kali","5 kali"],
+    jawaban:2
+  },
+  {
+    no:12, kelompok:"Kelompok A – UUD 1945",
+    soal:"Berdasarkan UUD 1945 Pasal 1 ayat (3), Indonesia adalah negara...",
+    opsi:["Federal","Hukum","Kesatuan","Demokrasi liberal"],
+    jawaban:1
+  },
+  {
+    no:13, kelompok:"Kelompok A – UUD 1945",
+    soal:"Hak-hak ASN yang berkaitan dengan perlindungan hukum diatur dalam UUD 1945 Pasal...",
+    opsi:["Pasal 27","Pasal 28D","Pasal 30","Pasal 34"],
+    jawaban:1
+  },
+  {
+    no:14, kelompok:"Kelompok A – UUD 1945",
+    soal:"Kekuasaan kehakiman di Indonesia dijalankan oleh...",
+    opsi:["Mahkamah Agung saja","Mahkamah Konstitusi saja","Mahkamah Agung dan Mahkamah Konstitusi","Komisi Yudisial"],
+    jawaban:2
+  },
+  {
+    no:15, kelompok:"Kelompok A – UUD 1945",
+    soal:"Pasal 33 UUD 1945 mengatur tentang...",
+    opsi:["Hak asasi manusia","Sistem perekonomian nasional","Pertahanan negara","Hak-hak warga negara"],
+    jawaban:1
+  },
+  {
+    no:16, kelompok:"Kelompok A – UUD 1945",
+    soal:"Berdasarkan UUD 1945, Presiden memegang kekuasaan pemerintahan bersama-sama dengan...",
+    opsi:["DPR","MPR","DPD","MA"],
+    jawaban:0
+  },
+  {
+    no:17, kelompok:"Kelompok A – UUD 1945",
+    soal:"Berapa persen anggota DPR harus menyetujui untuk mengubah UUD 1945?",
+    opsi:["50%+1 dari seluruh anggota MPR","2/3 dari anggota MPR yang hadir, dan 2/3 anggota MPR harus hadir","50%+1 dari anggota DPR","2/3 dari total anggota DPR"],
+    jawaban:1
+  },
+  {
+    no:18, kelompok:"Kelompok A – UUD 1945",
+    soal:"Hak imunitas anggota DPR diatur dalam UUD 1945, artinya anggota DPR...",
+    opsi:["Kebal hukum sepenuhnya","Tidak dapat dituntut di muka pengadilan atas pernyataan dalam sidang DPR","Bebas dari pajak","Dapat mengabaikan panggilan KPK"],
+    jawaban:1
+  },
+  {
+    no:19, kelompok:"Kelompok A – UUD 1945",
+    soal:"Otonomi daerah di Indonesia diatur terutama dalam UUD 1945 Pasal...",
+    opsi:["Pasal 17","Pasal 18","Pasal 20","Pasal 22"],
+    jawaban:1
+  },
+  {
+    no:20, kelompok:"Kelompok A – UUD 1945",
+    soal:"Pembukaan UUD 1945 alinea ke-3 menyatakan tujuan kemerdekaan Indonesia, yaitu...",
+    opsi:["Membentuk pemerintahan yang berdaulat","Atas berkat rahmat Allah dan didorong keinginan luhur supaya berkehidupan kebangsaan yang bebas","Melindungi segenap bangsa Indonesia","Mencerdaskan kehidupan bangsa"],
+    jawaban:1
+  },
+  // === KELOMPOK A: RPJMN (21-25) ===
+  {
+    no:21, kelompok:"Kelompok A – RPJMN",
+    soal:"RPJMN merupakan singkatan dari...",
+    opsi:["Rencana Pembangunan Jangka Menengah Nasional","Rencana Program Jangka Menengah Nasional","Rencana Pembangunan Jangka Makro Nasional","Rencana Prioritas Jangka Menengah Negara"],
+    jawaban:0
+  },
+  {
+    no:22, kelompok:"Kelompok A – RPJMN",
+    soal:"RPJMN 2020–2024 ditetapkan melalui...",
+    opsi:["Perpres No. 18 Tahun 2020","UU No. 17 Tahun 2007","Perpres No. 7 Tahun 2005","PP No. 40 Tahun 2006"],
+    jawaban:0
+  },
+  {
+    no:23, kelompok:"Kelompok A – RPJMN",
+    soal:"RPJPN (Rencana Pembangunan Jangka Panjang Nasional) berlaku untuk jangka waktu...",
+    opsi:["5 tahun","10 tahun","20 tahun","25 tahun"],
+    jawaban:2
+  },
+  {
+    no:24, kelompok:"Kelompok A – RPJMN",
+    soal:"Salah satu misi RPJMN yang terkait dengan reformasi birokrasi adalah...",
+    opsi:["Menciptakan pemerintahan yang bersih, efektif, dan terpercaya","Meningkatkan pertumbuhan ekonomi semata","Membangun infrastruktur fisik negara","Mengurangi jumlah ASN"],
+    jawaban:0
+  },
+  {
+    no:25, kelompok:"Kelompok A – RPJMN",
+    soal:"Rencana Strategis (Renstra) Kementerian/Lembaga harus mengacu pada...",
+    opsi:["RPJPN","RPJMN","APBN","Peraturan Menteri"],
+    jawaban:1
+  },
+  // === KELOMPOK B: PERPU KEPEGAWAIAN (26-40) ===
+  {
+    no:26, kelompok:"Kelompok B – Kepegawaian",
+    soal:"Undang-Undang yang menjadi dasar manajemen ASN di Indonesia saat ini adalah...",
+    opsi:["UU No. 8 Tahun 1974","UU No. 43 Tahun 1999","UU No. 5 Tahun 2014","UU No. 30 Tahun 2014"],
+    jawaban:2
+  },
+  {
+    no:27, kelompok:"Kelompok B – Kepegawaian",
+    soal:"ASN terdiri dari dua jenis, yaitu...",
+    opsi:["PNS dan PPPK","PNS dan TNI","CPNS dan PNS","Pegawai Tetap dan Pegawai Honorer"],
+    jawaban:0
+  },
+  {
+    no:28, kelompok:"Kelompok B – Kepegawaian",
+    soal:"Instansi yang berwenang melaksanakan manajemen ASN secara nasional adalah...",
+    opsi:["Kementerian PAN-RB","BKN (Badan Kepegawaian Negara)","KASN (Komisi Aparatur Sipil Negara)","LAN (Lembaga Administrasi Negara)"],
+    jawaban:1
+  },
+  {
+    no:29, kelompok:"Kelompok B – Kepegawaian",
+    soal:"Sistem merit dalam manajemen ASN berarti kebijakan kepegawaian didasarkan pada...",
+    opsi:["Kedekatan dengan pimpinan","Kualifikasi, kompetensi, dan kinerja","Senioritas dan masa kerja","Latar belakang keluarga dan daerah asal"],
+    jawaban:1
+  },
+  {
+    no:30, kelompok:"Kelompok B – Kepegawaian",
+    soal:"Penilaian prestasi kerja PNS dilakukan berdasarkan...",
+    opsi:["Sasaran Kerja Pegawai (SKP) dan perilaku kerja","Absensi dan lembur","Hubungan dengan atasan","Masa kerja dan golongan"],
+    jawaban:0
+  },
+  {
+    no:31, kelompok:"Kelompok B – Kepegawaian",
+    soal:"PNS dapat dikenai hukuman disiplin berat berupa...",
+    opsi:["Teguran tertulis","Penundaan kenaikan gaji berkala","Penurunan jabatan setingkat lebih rendah","Pembebasan dari jabatan fungsional"],
+    jawaban:2
+  },
+  {
+    no:32, kelompok:"Kelompok B – Kepegawaian",
+    soal:"Cuti sakit PNS yang mengakibatkan tidak masuk kerja lebih dari 14 hari harus mendapat persetujuan dari...",
+    opsi:["Pejabat eselon II","Dokter penguji tersendiri","Tim penguji kesehatan yang ditunjuk Menteri Kesehatan","Pejabat Pembina Kepegawaian"],
+    jawaban:3
+  },
+  {
+    no:33, kelompok:"Kelompok B – Kepegawaian",
+    soal:"Jabatan fungsional adalah jabatan ASN yang memiliki fungsi, tugas, dan tanggung jawab berkaitan dengan...",
+    opsi:["Pimpinan unit kerja","Pelayanan fungsional yang berdasarkan pada keahlian dan keterampilan tertentu","Pengambilan keputusan strategis","Pengelolaan administrasi pemerintahan"],
+    jawaban:1
+  },
+  {
+    no:34, kelompok:"Kelompok B – Kepegawaian",
+    soal:"Apa yang dimaksud dengan kenaikan pangkat reguler bagi PNS?",
+    opsi:["Kenaikan pangkat karena prestasi luar biasa","Kenaikan pangkat yang diberikan karena memenuhi syarat yang ditentukan tanpa terikat jabatan","Kenaikan pangkat karena penghargaan","Kenaikan pangkat darurat"],
+    jawaban:1
+  },
+  {
+    no:35, kelompok:"Kelompok B – Kepegawaian",
+    soal:"Batas usia pensiun PNS yang menduduki jabatan administrator adalah...",
+    opsi:["56 tahun","58 tahun","60 tahun","65 tahun"],
+    jawaban:1
+  },
+  {
+    no:36, kelompok:"Kelompok B – Kepegawaian",
+    soal:"Pengisian jabatan pimpinan tinggi di instansi pemerintah dilakukan melalui...",
+    opsi:["Penunjukan langsung Presiden","Seleksi terbuka dan kompetitif","Rotasi internal tanpa seleksi","Rekomendasi partai politik"],
+    jawaban:1
+  },
+  {
+    no:37, kelompok:"Kelompok B – Kepegawaian",
+    soal:"PNS yang melakukan pelanggaran disiplin berhak mendapat...",
+    opsi:["Pembelaan diri sebelum dijatuhkan hukuman","Pemberhentian langsung","Mutasi ke daerah terpencil","Pensiun dini"],
+    jawaban:0
+  },
+  {
+    no:38, kelompok:"Kelompok B – Kepegawaian",
+    soal:"Tujuan diklat prajabatan (latsar) bagi CPNS adalah...",
+    opsi:["Meningkatkan pangkat CPNS","Membentuk PNS yang profesional, berkarakter, dan berkompeten","Menentukan penempatan jabatan","Menguji kemampuan teknis CPNS"],
+    jawaban:1
+  },
+  {
+    no:39, kelompok:"Kelompok B – Kepegawaian",
+    soal:"Pegawai Pemerintah dengan Perjanjian Kerja (PPPK) dapat diangkat pada jabatan...",
+    opsi:["Semua jabatan ASN","Jabatan Pimpinan Tinggi, Jabatan Fungsional, dan Jabatan Administrasi","Jabatan fungsional dan jabatan pimpinan tinggi","Hanya jabatan fungsional"],
+    jawaban:2
+  },
+  {
+    no:40, kelompok:"Kelompok B – Kepegawaian",
+    soal:"Tunjangan kinerja PNS didasarkan pada...",
+    opsi:["Masa kerja dan golongan","Hasil penilaian capaian kinerja dan kehadiran","Jabatan struktural semata","Pendidikan terakhir"],
+    jawaban:1
+  },
+  // === KELOMPOK B: KORPRI (41-45) ===
+  {
+    no:41, kelompok:"Kelompok B – KORPRI",
+    soal:"KORPRI didirikan pada tanggal...",
+    opsi:["17 Agustus 1945","29 November 1971","5 Oktober 1945","1 Januari 1970"],
+    jawaban:1
+  },
+  {
+    no:42, kelompok:"Kelompok B – KORPRI",
+    soal:"Tujuan utama KORPRI adalah...",
+    opsi:["Memperjuangkan kenaikan gaji PNS","Menghimpun dan membina seluruh ASN dalam meningkatkan pengabdian kepada bangsa dan negara","Menjadi wadah partai politik ASN","Mengawasi kinerja pemerintah"],
+    jawaban:1
+  },
+  {
+    no:43, kelompok:"Kelompok B – KORPRI",
+    soal:"Berdasarkan UU ASN, anggota ASN dilarang menjadi anggota dan/atau pengurus...",
+    opsi:["KORPRI","Partai politik","Ormas keagamaan","Koperasi ASN"],
+    jawaban:1
+  },
+  {
+    no:44, kelompok:"Kelompok B – KORPRI",
+    soal:"Motto KORPRI adalah...",
+    opsi:["Bhinneka Tunggal Ika","Melayani, Profesional, Bermartabat","Satya Nagara Bhakti","Tut Wuri Handayani"],
+    jawaban:1
+  },
+  {
+    no:45, kelompok:"Kelompok B – KORPRI",
+    soal:"Dalam Kode Etik ASN, seorang ASN wajib...",
+    opsi:["Mengikuti instruksi atasan meskipun bertentangan dengan hukum","Memberikan pelayanan publik yang profesional dan berkualitas","Mengutamakan kepentingan diri sendiri","Menolak tugas yang tidak sesuai jabatan"],
+    jawaban:1
+  },
+  // === KELOMPOK C: PENGETAHUAN PERKANTORAN (46-55) ===
+  {
+    no:46, kelompok:"Kelompok C – Perkantoran",
+    soal:"Tata naskah dinas di lingkungan instansi pemerintah diatur dalam...",
+    opsi:["Permenpan-RB No. 80 Tahun 2012","Permenpan-RB No. 35 Tahun 2012","Perpres No. 16 Tahun 2018","PP No. 28 Tahun 2012"],
+    jawaban:0
+  },
+  {
+    no:47, kelompok:"Kelompok C – Perkantoran",
+    soal:"Nota Dinas adalah naskah dinas yang digunakan untuk...",
+    opsi:["Surat menyurat antar instansi","Komunikasi internal di lingkungan satu unit kerja","Pengumuman kepada masyarakat luas","Laporan resmi kepada atasan"],
+    jawaban:1
+  },
+  {
+    no:48, kelompok:"Kelompok C – Perkantoran",
+    soal:"Sistem penomoran surat dinas umumnya terdiri dari...",
+    opsi:["Nomor urut, kode instansi, dan tahun","Nomor urut dan tanggal saja","Kode jabatan dan nomor urut","Tanggal dan nomor urut"],
+    jawaban:0
+  },
+  {
+    no:49, kelompok:"Kelompok C – Perkantoran",
+    soal:"Kearsipan pemerintah di Indonesia diatur dalam...",
+    opsi:["UU No. 43 Tahun 2009","UU No. 14 Tahun 2008","PP No. 28 Tahun 2012","UU No. 11 Tahun 2008"],
+    jawaban:0
+  },
+  {
+    no:50, kelompok:"Kelompok C – Perkantoran",
+    soal:"Jadwal Retensi Arsip (JRA) digunakan untuk menentukan...",
+    opsi:["Cara penyimpanan arsip","Jangka waktu penyimpanan dan nasib akhir arsip","Klasifikasi arsip","Sistem penomoran arsip"],
+    jawaban:1
+  },
+  {
+    no:51, kelompok:"Kelompok C – Perkantoran",
+    soal:"Prosedur pengadaan barang/jasa pemerintah diatur dalam...",
+    opsi:["Perpres No. 16 Tahun 2018","PP No. 58 Tahun 2005","UU No. 1 Tahun 2004","Permendagri No. 13 Tahun 2006"],
+    jawaban:0
+  },
+  {
+    no:52, kelompok:"Kelompok C – Perkantoran",
+    soal:"Laporan yang dibuat oleh bawahan kepada atasan mengenai pelaksanaan tugas disebut...",
+    opsi:["Laporan keuangan","Laporan pertanggungjawaban","Laporan hasil kerja","Memori jabatan"],
+    jawaban:1
+  },
+  {
+    no:53, kelompok:"Kelompok C – Perkantoran",
+    soal:"Disposisi dalam surat menyurat dinas berarti...",
+    opsi:["Tanda tangan pejabat yang berwenang","Catatan singkat pimpinan tentang tindak lanjut surat masuk","Pembatalan surat","Pengarsipan surat"],
+    jawaban:1
+  },
+  {
+    no:54, kelompok:"Kelompok C – Perkantoran",
+    soal:"Surat yang bersifat RAHASIA harus...",
+    opsi:["Dikirim melalui email biasa","Dimasukkan dalam amplop tertutup dan diberi kode keamanan","Diserahkan langsung tanpa amplop","Disimpan di laci terbuka"],
+    jawaban:1
+  },
+  {
+    no:55, kelompok:"Kelompok C – Perkantoran",
+    soal:"Pengertian 'efisiensi' dalam perkantoran modern adalah...",
+    opsi:["Menghasilkan output sebesar mungkin tanpa peduli biaya","Menggunakan sumber daya secara optimal untuk mencapai tujuan dengan biaya minimal","Bekerja selama mungkin untuk menyelesaikan tugas","Memperbanyak staf agar pekerjaan cepat selesai"],
+    jawaban:1
+  },
+  // === KELOMPOK D: RENSTRA (56-65) ===
+  {
+    no:56, kelompok:"Kelompok D – Renstra Instansi",
+    soal:"Renstra instansi pemerintah merupakan dokumen perencanaan untuk periode...",
+    opsi:["1 tahun","3 tahun","5 tahun","10 tahun"],
+    jawaban:2
+  },
+  {
+    no:57, kelompok:"Kelompok D – Renstra Instansi",
+    soal:"Isi utama dokumen Renstra adalah...",
+    opsi:["Visi, misi, tujuan, sasaran, strategi, dan program","Laporan keuangan dan realisasi anggaran","Daftar pegawai dan jabatan","Standar operasional prosedur"],
+    jawaban:0
+  },
+  {
+    no:58, kelompok:"Kelompok D – Renstra Instansi",
+    soal:"RPJMD adalah singkatan dari...",
+    opsi:["Rencana Pembangunan Jangka Menengah Daerah","Rencana Program Jangka Maju Daerah","Rencana Pengeluaran Jangka Menengah Daerah","Rencana Pembangunan Jangka Makro Daerah"],
+    jawaban:0
+  },
+  {
+    no:59, kelompok:"Kelompok D – Renstra Instansi",
+    soal:"Indikator Kinerja Utama (IKU) digunakan untuk mengukur...",
+    opsi:["Jumlah pegawai","Keberhasilan pencapaian tujuan dan sasaran organisasi","Besaran anggaran instansi","Volume pekerjaan administrasi"],
+    jawaban:1
+  },
+  {
+    no:60, kelompok:"Kelompok D – Renstra Instansi",
+    soal:"Analisis SWOT dalam perencanaan strategis terdiri dari...",
+    opsi:["Strengths, Weaknesses, Opportunities, Threats","Strategies, Weaknesses, Operations, Targets","Situation, Work, Objectives, Tasks","Standards, Work, Operations, Threats"],
+    jawaban:0
+  },
+  {
+    no:61, kelompok:"Kelompok D – Renstra Instansi",
+    soal:"Evaluasi pelaksanaan Renstra dilakukan melalui...",
+    opsi:["Monitoring dan evaluasi secara berkala","Audit keuangan saja","Inspeksi mendadak","Laporan tahunan saja"],
+    jawaban:0
+  },
+  {
+    no:62, kelompok:"Kelompok D – Renstra Instansi",
+    soal:"Akuntabilitas kinerja instansi pemerintah diwujudkan dalam bentuk...",
+    opsi:["Laporan Keuangan (LK)","Laporan Akuntabilitas Kinerja Instansi Pemerintah (LAKIP/LKjIP)","Nota Keuangan","Rencana Kerja Anggaran (RKA)"],
+    jawaban:1
+  },
+  {
+    no:63, kelompok:"Kelompok D – Renstra Instansi",
+    soal:"Cascading dalam manajemen kinerja berarti...",
+    opsi:["Penurunan kinerja pegawai","Penurunan target kinerja dari level organisasi ke level individu","Kenaikan pangkat pegawai","Rotasi jabatan secara berkala"],
+    jawaban:1
+  },
+  {
+    no:64, kelompok:"Kelompok D – Renstra Instansi",
+    soal:"Balanced Scorecard (BSC) dalam manajemen kinerja pemerintah mengukur kinerja dari perspektif...",
+    opsi:["Keuangan, pelanggan, proses internal, dan pembelajaran & pertumbuhan","Hanya keuangan dan SDM","Keuangan, teknis, dan SDM","Visi, misi, tujuan, dan sasaran"],
+    jawaban:0
+  },
+  {
+    no:65, kelompok:"Kelompok D – Renstra Instansi",
+    soal:"Reformasi birokrasi bertujuan untuk menciptakan...",
+    opsi:["Birokrasi yang besar dan kuat","Tata kelola pemerintahan yang baik (good governance)","Penambahan jumlah ASN yang signifikan","Kekuasaan pemerintah yang absolut"],
+    jawaban:1
+  },
+  // === KELOMPOK D: SOTK (66-75) ===
+  {
+    no:66, kelompok:"Kelompok D – SOTK",
+    soal:"SOTK adalah singkatan dari...",
+    opsi:["Sistem Organisasi dan Tugas Kerja","Struktur Organisasi dan Tata Kerja","Standar Operasional Tugas Kerja","Susunan Organisasi dan Tugas Kelembagaan"],
+    jawaban:1
+  },
+  {
+    no:67, kelompok:"Kelompok D – SOTK",
+    soal:"Prinsip span of control (rentang kendali) dalam organisasi berarti...",
+    opsi:["Pembatasan anggaran yang dikendalikan","Jumlah bawahan yang dapat diawasi secara efektif oleh seorang atasan","Luas wilayah kerja seorang pejabat","Batasan kewenangan jabatan"],
+    jawaban:1
+  },
+  {
+    no:68, kelompok:"Kelompok D – SOTK",
+    soal:"Prinsip organisasi yang menyatakan bahwa setiap bawahan hanya memiliki satu atasan langsung disebut...",
+    opsi:["Kesatuan komando (unity of command)","Span of control","Delegation of authority","Division of work"],
+    jawaban:0
+  },
+  {
+    no:69, kelompok:"Kelompok D – SOTK",
+    soal:"Eselon IIA dalam birokrasi pemerintah umumnya setara dengan jabatan...",
+    opsi:["Direktur Jenderal","Direktur/Kepala Biro","Kepala Subdirektorat/Kepala Bagian","Kepala Subbagian"],
+    jawaban:1
+  },
+  {
+    no:70, kelompok:"Kelompok D – SOTK",
+    soal:"Desentralisasi dalam konteks pemerintahan berarti...",
+    opsi:["Pemusatan kekuasaan di pemerintah pusat","Penyerahan urusan pemerintahan dari pemerintah pusat kepada daerah otonom","Pengalihan tugas dari atasan kepada bawahan","Penghapusan kewenangan daerah"],
+    jawaban:1
+  },
+  {
+    no:71, kelompok:"Kelompok D – SOTK",
+    soal:"Koordinasi dalam organisasi pemerintah bertujuan untuk...",
+    opsi:["Menghilangkan persaingan antar unit kerja","Menyerasikan, menyinkronkan, dan mengintegrasikan tujuan, kegiatan, dan sumber daya","Memperlambat pengambilan keputusan","Meningkatkan hierarki jabatan"],
+    jawaban:1
+  },
+  {
+    no:72, kelompok:"Kelompok D – SOTK",
+    soal:"SOP (Standar Operasional Prosedur) dalam organisasi berfungsi sebagai...",
+    opsi:["Pedoman baku pelaksanaan tugas agar konsisten dan terstandar","Laporan kepada atasan","Panduan gaji pegawai","Panduan perekrutan pegawai"],
+    jawaban:0
+  },
+  {
+    no:73, kelompok:"Kelompok D – SOTK",
+    soal:"Delegasi wewenang dalam manajemen berarti...",
+    opsi:["Pemimpin melepaskan seluruh tanggung jawabnya","Penyerahan sebagian wewenang kepada bawahan untuk melaksanakan tugas tertentu","Pergantian pejabat secara berkala","Penggabungan dua unit kerja menjadi satu"],
+    jawaban:1
+  },
+  {
+    no:74, kelompok:"Kelompok D – SOTK",
+    soal:"Analisis jabatan dilakukan untuk menghasilkan...",
+    opsi:["Daftar gaji pegawai","Uraian jabatan (job description) dan spesifikasi jabatan (job specification)","Laporan keuangan instansi","Rencana pengadaan barang"],
+    jawaban:1
+  },
+  {
+    no:75, kelompok:"Kelompok D – SOTK",
+    soal:"Good Governance memiliki prinsip utama di antaranya...",
+    opsi:["Sentralisasi, kerahasiaan, dan monopoli","Transparansi, akuntabilitas, partisipasi, dan rule of law","Efisiensi, kekuasaan, dan kepatuhan","Kewenangan, disiplin, dan uniformitas"],
+    jawaban:1
+  },
+  // === KELOMPOK E: BAHASA INDONESIA (76-85) ===
+  {
+    no:76, kelompok:"Kelompok E – Bahasa Indonesia",
+    soal:"Penulisan kata yang benar sesuai EYD/PUEBI adalah...",
+    opsi:["praktek","praktek","praktik","praktijk"],
+    jawaban:2
+  },
+  {
+    no:77, kelompok:"Kelompok E – Bahasa Indonesia",
+    soal:"Kalimat efektif dalam surat dinas ditandai dengan ciri-ciri...",
+    opsi:["Panjang, berbunga-bunga, dan menggunakan kata asing","Singkat, jelas, lugas, dan tidak ambigu","Menggunakan bahasa daerah","Bersifat informal dan personal"],
+    jawaban:1
+  },
+  {
+    no:78, kelompok:"Kelompok E – Bahasa Indonesia",
+    soal:"Penulisan gelar akademik yang benar adalah...",
+    opsi:["Drs. Ahmad, S.H.","Ahmad S.H.","Ahmad, S.H.","Ahmad S H"],
+    jawaban:2
+  },
+  {
+    no:79, kelompok:"Kelompok E – Bahasa Indonesia",
+    soal:"Kata 'apotek' merupakan bentuk baku dari kata...",
+    opsi:["apotik","aptik","apotik dan apotek sama benar","pharmacie"],
+    jawaban:0
+  },
+  {
+    no:80, kelompok:"Kelompok E – Bahasa Indonesia",
+    soal:"Penulisan angka yang benar dalam teks resmi untuk bilangan yang dapat dinyatakan satu atau dua kata adalah...",
+    opsi:["Menggunakan angka","Menggunakan huruf","Boleh angka atau huruf","Menggunakan angka Romawi"],
+    jawaban:1
+  },
+  {
+    no:81, kelompok:"Kelompok E – Bahasa Indonesia",
+    soal:"Kalimat 'Kepada Yth. Bapak Kepala BKN di Jakarta' dalam surat dinas, penggunaan 'Kepada' dinilai...",
+    opsi:["Sudah benar","Mubazir, cukup 'Yth.' saja","Salah, harus 'Untuk'","Perlu ditambah 'Yang Terhormat'"],
+    jawaban:1
+  },
+  {
+    no:82, kelompok:"Kelompok E – Bahasa Indonesia",
+    soal:"Tanda baca yang digunakan untuk memisahkan anak kalimat yang mendahului induk kalimat adalah...",
+    opsi:["Titik (.)","Titik koma (;)","Koma (,)","Tanda hubung (-)"],
+    jawaban:2
+  },
+  {
+    no:83, kelompok:"Kelompok E – Bahasa Indonesia",
+    soal:"Sinonim kata 'kompeten' adalah...",
+    opsi:["Tidak mampu","Cakap dan ahli","Berwenang secara hukum saja","Dermawan"],
+    jawaban:1
+  },
+  {
+    no:84, kelompok:"Kelompok E – Bahasa Indonesia",
+    soal:"Ragam bahasa resmi/formal yang digunakan dalam surat dinas harus...",
+    opsi:["Singkat dan menggunakan singkatan bebas","Baku, lugas, dan mudah dipahami","Mengandung banyak kata kiasan","Informal dan akrab"],
+    jawaban:1
+  },
+  {
+    no:85, kelompok:"Kelompok E – Bahasa Indonesia",
+    soal:"Paragraf yang kalimat utamanya terletak di awal paragraf disebut paragraf...",
+    opsi:["Induktif","Deduktif","Campuran","Naratif"],
+    jawaban:1
+  },
+  // === KELOMPOK E: SEJARAH INDONESIA (86-100) ===
+  {
+    no:86, kelompok:"Kelompok E – Sejarah Indonesia",
+    soal:"Proklamasi kemerdekaan Indonesia dibacakan pada tanggal...",
+    opsi:["17 Agustus 1945","15 Agustus 1945","18 Agustus 1945","20 Agustus 1945"],
+    jawaban:0
+  },
+  {
+    no:87, kelompok:"Kelompok E – Sejarah Indonesia",
+    soal:"Rumusan dasar negara yang pertama kali dikemukakan Ir. Soekarno pada 1 Juni 1945 adalah...",
+    opsi:["Pancasila dengan urutan seperti sekarang","Piagam Jakarta","Pancasila dengan sila pertama 'Kebangsaan Indonesia'","Trisakti"],
+    jawaban:2
+  },
+  {
+    no:88, kelompok:"Kelompok E – Sejarah Indonesia",
+    soal:"Isi Sumpah Pemuda 28 Oktober 1928 adalah...",
+    opsi:["Bertumpah darah satu, berbangsa satu, menjunjung bahasa persatuan yaitu Bahasa Indonesia","Satu nusa, satu bangsa, dan satu bahasa","Kemerdekaan adalah hak setiap bangsa","Proklamasi kemerdekaan Indonesia"],
+    jawaban:0
+  },
+  {
+    no:89, kelompok:"Kelompok E – Sejarah Indonesia",
+    soal:"Agresi Militer Belanda I terjadi pada tahun...",
+    opsi:["1945","1947","1948","1949"],
+    jawaban:1
+  },
+  {
+    no:90, kelompok:"Kelompok E – Sejarah Indonesia",
+    soal:"Konferensi Asia-Afrika tahun 1955 diselenggarakan di...",
+    opsi:["Jakarta","Bandung","Yogyakarta","Surabaya"],
+    jawaban:1
+  },
+  {
+    no:91, kelompok:"Kelompok E – Sejarah Indonesia",
+    soal:"Orde Baru dimulai dengan dikeluarkannya...",
+    opsi:["Dekrit Presiden 5 Juli 1959","Supersemar (Surat Perintah 11 Maret 1966)","Proklamasi 17 Agustus 1945","Tap MPR tentang pemerintahan"],
+    jawaban:1
+  },
+  {
+    no:92, kelompok:"Kelompok E – Sejarah Indonesia",
+    soal:"Reformasi 1998 ditandai dengan turunnya Presiden...",
+    opsi:["Megawati Soekarnoputri","B.J. Habibie","Soeharto","Abdurrahman Wahid"],
+    jawaban:2
+  },
+  {
+    no:93, kelompok:"Kelompok E – Sejarah Indonesia",
+    soal:"Budi Utomo didirikan pada tanggal...",
+    opsi:["2 Mei 1908","28 Oktober 1928","17 Agustus 1945","1 Juni 1945"],
+    jawaban:0
+  },
+  {
+    no:94, kelompok:"Kelompok E – Sejarah Indonesia",
+    soal:"Perjanjian yang mengakui kedaulatan Indonesia secara internasional adalah...",
+    opsi:["Perjanjian Linggajati","Perjanjian Renville","KMB (Konferensi Meja Bundar)","Perjanjian Roem-Royen"],
+    jawaban:2
+  },
+  {
+    no:95, kelompok:"Kelompok E – Sejarah Indonesia",
+    soal:"Sistem pemerintahan Indonesia pada masa Orde Lama menggunakan Demokrasi...",
+    opsi:["Liberal (1950-1959) kemudian Terpimpin (1959-1966)","Pancasila sepanjang masa","Parlementer sepanjang masa","Terpimpin sepanjang masa"],
+    jawaban:0
+  },
+  {
+    no:96, kelompok:"Kelompok E – Sejarah Indonesia",
+    soal:"G30S/PKI terjadi pada tanggal...",
+    opsi:["1 Oktober 1965","30 September 1965","17 Agustus 1965","11 Maret 1966"],
+    jawaban:1
+  },
+  {
+    no:97, kelompok:"Kelompok E – Sejarah Indonesia",
+    soal:"Pahlawan Nasional yang dikenal sebagai 'Bapak Pendidikan Nasional' adalah...",
+    opsi:["Ir. Soekarno","Ki Hajar Dewantara","Mohammad Hatta","R.A. Kartini"],
+    jawaban:1
+  },
+  {
+    no:98, kelompok:"Kelompok E – Sejarah Indonesia",
+    soal:"Integrasi Timor Timur ke Indonesia terjadi pada tahun...",
+    opsi:["1969","1975","1976","1998"],
+    jawaban:2
+  },
+  {
+    no:99, kelompok:"Kelompok E – Sejarah Indonesia",
+    soal:"Semboyan 'Bhinneka Tunggal Ika' berasal dari kitab...",
+    opsi:["Negarakertagama","Sutasoma","Pararaton","Arjunawiwaha"],
+    jawaban:1
+  },
+  {
+    no:100, kelompok:"Kelompok E – Sejarah Indonesia",
+    soal:"Nama lengkap ibu kota negara baru Indonesia yang diresmikan sebagai ibu kota adalah...",
+    opsi:["Nusantara","Kota Nusantara","Ibu Kota Nusantara","Kotabaru Nusantara"],
+    jawaban:0
+  }
+];
+
+// ========== STATE ==========
+let soalAktif = 0;
+let jawaban = new Array(100).fill(-1);
+let ragu = new Array(100).fill(false);
+let timerSisa = 90 * 60;
+let timerInterval = null;
+let ujianAktif = false;
+let reviewMode = false;
+
+// ========== INIT ==========
+function mulaiUjian() {
+  document.getElementById('welcomeScreen').style.display = 'none';
+  ujianAktif = true;
+  renderNomorGrid();
+  tampilSoal(0);
+  startTimer();
+}
+
+function startTimer() {
+  timerInterval = setInterval(() => {
+    timerSisa--;
+    updateTimer();
+    if(timerSisa <= 0) {
+      clearInterval(timerInterval);
+      selesaiUjianOtomatis();
+    }
+  }, 1000);
+}
+
+function updateTimer() {
+  const m = Math.floor(timerSisa/60);
+  const s = timerSisa % 60;
+  const el = document.getElementById('timerDisplay');
+  el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  el.className = timerSisa <= 300 ? 'timer-value urgent' : 'timer-value';
+}
+
+// ========== RENDER ==========
+function tampilSoal(idx) {
+  soalAktif = idx;
+  const s = soalData[idx];
+  document.getElementById('soalNomor').textContent = `Soal ${idx+1} dari 100`;
+  document.getElementById('soalKelompok').textContent = s.kelompok;
+  document.getElementById('soalTeks').textContent = `${idx+1}. ${s.soal}`;
+
+  const opsiEl = document.getElementById('opsiList');
+  const huruf = ['A','B','C','D'];
+  opsiEl.innerHTML = '';
+  s.opsi.forEach((op,i) => {
+    const li = document.createElement('li');
+    li.className = 'opsi-item';
+    if(!reviewMode && jawaban[idx] === i) li.classList.add('selected');
+    if(reviewMode) {
+      if(i === s.jawaban) li.classList.add('correct');
+      else if(jawaban[idx] === i) li.classList.add('wrong');
+    }
+    li.innerHTML = `<div class="opsi-huruf">${huruf[i]}</div><div class="opsi-teks">${op}</div>`;
+    if(!reviewMode) li.onclick = () => pilihJawaban(idx, i);
+    opsiEl.appendChild(li);
+  });
+
+  document.getElementById('btnPrev').disabled = idx === 0;
+  document.getElementById('btnNext').textContent = idx === 99 ? '✔ Selesai' : 'Berikutnya ▶';
+  document.getElementById('btnNext').onclick = idx === 99 ? konfirmasiSelesai : nextSoal;
+
+  const btnRagu = document.getElementById('btnRagu');
+  btnRagu.className = 'btn btn-ragu' + (ragu[idx] ? ' active' : '');
+  btnRagu.style.display = reviewMode ? 'none' : '';
+
+  updateNomorGrid();
+  updateSidebar();
+}
+
+function pilihJawaban(idx, opsiIdx) {
+  if(reviewMode) return;
+  jawaban[idx] = opsiIdx;
+  tampilSoal(idx);
+}
+
+function prevSoal() { if(soalAktif > 0) tampilSoal(soalAktif-1); }
+function nextSoal() { if(soalAktif < 99) tampilSoal(soalAktif+1); }
+
+function toggleRagu() {
+  ragu[soalAktif] = !ragu[soalAktif];
+  tampilSoal(soalAktif);
+}
+
+function renderNomorGrid() {
+  const grid = document.getElementById('nomorGrid');
+  grid.innerHTML = '';
+  for(let i=0;i<100;i++) {
+    const btn = document.createElement('button');
+    btn.className = 'nomor-btn';
+    btn.id = `nb-${i}`;
+    btn.textContent = i+1;
+    btn.onclick = () => tampilSoal(i);
+    grid.appendChild(btn);
+  }
+}
+
+function updateNomorGrid() {
+  for(let i=0;i<100;i++) {
+    const btn = document.getElementById(`nb-${i}`);
+    if(!btn) continue;
+    btn.className = 'nomor-btn';
+    if(i === soalAktif) btn.classList.add('aktif');
+    else if(ragu[i]) btn.classList.add('ragu');
+    else if(jawaban[i] !== -1) btn.classList.add('dijawab');
+  }
+}
+
+function updateSidebar() {
+  const dijawab = jawaban.filter(j => j !== -1).length;
+  const raguJml = ragu.filter(r => r).length;
+  document.getElementById('statDijawab').textContent = dijawab;
+  document.getElementById('statBelum').textContent = 100 - dijawab;
+  document.getElementById('statRagu').textContent = raguJml;
+  document.getElementById('headerProgress').textContent = `📊 ${dijawab}/100 Terjawab`;
+  const pct = Math.round(dijawab);
+  document.getElementById('progressBar').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = `${pct}% soal terjawab`;
+}
+
+// ========== SELESAI ==========
+function konfirmasiSelesai() {
+  const dijawab = jawaban.filter(j => j !== -1).length;
+  const raguJml = ragu.filter(r => r).length;
+  const belum = 100 - dijawab;
+  document.getElementById('konfirmasiStats').innerHTML =
+    `<strong>Dijawab:</strong> ${dijawab} soal<br><strong>Belum dijawab:</strong> ${belum} soal<br><strong>Ragu-ragu:</strong> ${raguJml} soal`;
+  document.getElementById('modalKonfirmasi').classList.add('show');
+}
+
+function tutupKonfirmasi() {
+  document.getElementById('modalKonfirmasi').classList.remove('show');
+}
+
+function selesaiUjian() {
+  clearInterval(timerInterval);
+  ujianAktif = false;
+  document.getElementById('modalKonfirmasi').classList.remove('show');
+  hitungHasil();
+}
+
+function selesaiUjianOtomatis() {
+  ujianAktif = false;
+  hitungHasil();
+}
+
+function hitungHasil() {
+  let benar = 0, salah = 0, kosong = 0;
+  soalData.forEach((s, i) => {
+    if(jawaban[i] === -1) kosong++;
+    else if(jawaban[i] === s.jawaban) benar++;
+    else salah++;
+  });
+  const skor = benar;
+  document.getElementById('hasilBenar').textContent = benar;
+  document.getElementById('hasilSalah').textContent = salah;
+  document.getElementById('hasilKosong').textContent = kosong;
+  document.getElementById('hasilSkor').textContent = skor;
+  const lulus = skor >= 70;
+  document.getElementById('hasilStatus').textContent = lulus ? '✅ LULUS — Memenuhi Nilai Patokan' : '❌ TIDAK LULUS — Di Bawah Nilai Patokan';
+  document.getElementById('hasilKet').innerHTML =
+    `Nilai patokan kelulusan: <strong>70</strong>. Anda mendapat <strong>${benar} soal benar</strong> dari 100 soal.<br>
+    ${lulus ? '🎉 Selamat! Anda dinyatakan lulus Ujian Dinas Tingkat I.' : '💪 Terus berlatih dan pelajari kembali materi yang kurang dikuasai.'}`;
+  document.getElementById('modalHasil').classList.add('show');
+}
+
+function reviewJawaban() {
+  document.getElementById('modalHasil').classList.remove('show');
+  reviewMode = true;
+  document.getElementById('btnRagu').style.display = 'none';
+  tampilSoal(0);
+}
+
+function ulangiUjian() {
+  location.reload();
+}
+</script>
+</body>
+</html>
